@@ -1,13 +1,21 @@
-<div>
-  <ion-header>
-  <ion-toolbar>
-    <ion-title>Login</ion-title>
-  </ion-toolbar>
-  </ion-header>
-  <ion-input label="Usuario"></ion-input>
-  <ion-input  type="password" label="password" value="NeverGonnaGiveYouUp">
-    <ion-input-password-toggle slot="end"></ion-input-password-toggle>
-  </ion-input>
-  <ion-button>Default</ion-button> <ion-button [disabled]="true">Disabled</ion-button>
+<div class="login-container">
+  <form (sumit) = "login($eveny)">
+    <div>
+      <ion-item>
+        <ion-input
+          #emailInput
+          label="Email input"
+          type="email"
+          [(ngModel)]="email"
+          name="email"
+          placeholder="email@domain.com"
+          >
+        </ion-input>
 
+      </ion-item>
+    </div>
+
+
+  </form>
+ 
 </div>
