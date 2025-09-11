@@ -1,21 +1,39 @@
 <div class="login-container">
-  <form (sumit) = "login($eveny)">
-    <div>
-      <ion-item>
-        <ion-input
-          #emailInput
-          label="Email input"
-          type="email"
-          [(ngModel)]="email"
-          name="email"
-          placeholder="email@domain.com"
-          >
-        </ion-input>
-
-      </ion-item>
-    </div>
-
-
+  <div class="logo-container">
+    <img src="assets/logo.png" alt="Logo" style="display:block; margin:auto; width:120px; height:auto;">
+  </div>
+  <form (submit)="login($event)">
+    <ion-item>
+      <ion-input
+        #emailInput
+        label="Email input"
+        type="email"
+        [(ngModel)]="email"
+        name="email"
+        placeholder="email@domain.com">
+      </ion-input>
+    </ion-item>
+    <ion-item class="ion-margin-top">
+      <ion-input
+        #passwordInput
+        type="password"
+        label="Password"
+        [(ngModel)]="password"
+        name="password"
+        value="NeverGonnaGiveYouUp">
+        <ion-input-password-toggle slot="end"></ion-input-password-toggle>
+      </ion-input>
+    </ion-item>
+    <ion-button expand="block" type="submit">Iniciar sesión</ion-button>
+    <ion-button expand="block" fill="outline" (click)="goToRegistro()">Registrarse</ion-button>
   </form>
- 
+  <!-- El botón de registro debe estar fuera del form -->
+  <ion-button expand="block" fill="outline" (click)="goToRegistro()">Registrarse</ion-button>
 </div>
+
+<ion-toast
+  [isOpen]="isToastOpen"
+  message="Credenciales incorrectas"
+  [duration]="5000"
+  (didDismiss)="isToastOpen = false"
+></ion-toast>

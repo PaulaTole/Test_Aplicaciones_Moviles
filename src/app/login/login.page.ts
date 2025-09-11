@@ -3,14 +3,15 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { createAnimation } from '@ionic/angular';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonInput, IonButton, IonInputPasswordToggle } from '@ionic/angular/standalone';
+import { IonContent, IonHeader, IonTitle, IonToolbar, IonInput, IonButton, IonInputPasswordToggle, IonItem, IonToast } from '@ionic/angular/standalone';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
   standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonInput, IonButton, IonInputPasswordToggle]
+  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonInput, IonButton, IonInputPasswordToggle, IonItem, IonToast, HttpClientModule]
 })
 export class LoginPage {
 
@@ -21,23 +22,24 @@ export class LoginPage {
   @ViewChild('emailInput', { read: ElementRef }) emailInput!: ElementRef;
   @ViewChild('passwordInput', { read: ElementRef }) passwordInput!: ElementRef;
 
-  constructor(private router: Router) { }
+constructor(private router: Router, private http: HttpClient) {} // Agrega HttpClient aquí
+
+  ngOnInit(){ }
+  
+
 
   login(event: Event) {
-    event.preventDefault();
+  console.log(this.email);
+    console.log(this.password);
 
     if (this.email === 'jesus.vargas@tinet.cl' && this.password === '123456') {
-      this.animateSuccess();
-      setTimeout(() => {
-        this.router.navigateByUrl('/home', {
-          state: { email: this.email }
-        });
-      }, 600);
+      this.router.navigateByUrl('/home');
     } else {
-      this.animateError();
       this.isToastOpen = true;
     }
   }
+
+  
 
   animateSuccess() {
     const animation = createAnimation()
@@ -69,5 +71,7 @@ export class LoginPage {
 
     animation.play();
   }
+  goToRegistro() {
+  this.router.navigateByUrl('/registro');}
 
 }
