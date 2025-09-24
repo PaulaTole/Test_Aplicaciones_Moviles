@@ -29,7 +29,7 @@ constructor(private router: Router, private http: HttpClient) {} // Agrega HttpC
 
 
   login(event: Event) {
-  console.log(this.email);
+    console.log(this.email);
     console.log(this.password);
 
     if (this.email === 'jesus.vargas@tinet.cl' && this.password === '123456') {

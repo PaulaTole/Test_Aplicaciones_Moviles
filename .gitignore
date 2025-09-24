@@ -70,6 +70,6 @@ testem.log
 Thumbs.db
 
 # bkackend
-api-backend/
+guardar_datos/
 
 
