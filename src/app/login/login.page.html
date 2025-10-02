@@ -2,29 +2,27 @@
   <div class="logo-container">
     <img src="assets/logo.png" alt="Logo" style="display:block; margin:auto; width:120px; height:auto;">
   </div>
-  <form (submit)="login($event)">
+  <form (ngSubmit)="login($event)">
     <ion-item>
       <ion-input
-        #emailInput
-        label="Email input"
+        #correoInput
         type="email"
-        [(ngModel)]="email"
-        name="email"
-        placeholder="email@domain.com">
+        [(ngModel)]="correo"
+        name="correo"
+        placeholder="tú@ejemplo.com">
       </ion-input>
     </ion-item>
     <ion-item class="ion-margin-top">
       <ion-input
-        #passwordInput
-        type="password"
-        label="Password"
-        [(ngModel)]="password"
-        name="password"
-        value="NeverGonnaGiveYouUp">
+        #contrasennaInput
+         type="password"
+          [(ngModel)]="contrasenna"
+          name="contrasenna"
+          placeholder="••••••••">
         <ion-input-password-toggle slot="end"></ion-input-password-toggle>
       </ion-input>
     </ion-item>
-    <ion-button expand="block" type="submit">Iniciar sesión</ion-button>
+   <ion-button expand="block" type="submit">Iniciar sesión</ion-button>
   </form>
   <ion-button expand="block" fill="outline" (click)="goToRegistro()">Registrarse</ion-button>
 </div>

@@ -14,37 +14,72 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
   imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonInput, IonButton, IonInputPasswordToggle, IonItem, IonToast, HttpClientModule]
 })
 export class LoginPage {
-
-  email: string = '';
-  password: string = '';
+  correo = '';
+  contrasenna = '';
   isToastOpen = false;
+  toastMessage = '';
+  toastColor: 'danger' | 'success' = 'danger';
 
-  @ViewChild('emailInput', { read: ElementRef }) emailInput!: ElementRef;
-  @ViewChild('passwordInput', { read: ElementRef }) passwordInput!: ElementRef;
+  @ViewChild('correoInput',     { read: ElementRef }) correoInput!: ElementRef;
+  @ViewChild('contrasennaInput',{ read: ElementRef }) contrasennaInput!: ElementRef;
 
-constructor(private router: Router, private http: HttpClient) {} // Agrega HttpClient aquí
+  constructor(private router: Router, private http: HttpClient) {}
 
-  ngOnInit(){ }
-  
-
-
-  login(event: Event) {
-    console.log(this.email);
-    console.log(this.password);
-
-    if (this.email === 'jesus.vargas@tinet.cl' && this.password === '123456') {
-      this.router.navigateByUrl('/home');
-    } else {
-      this.isToastOpen = true;
+  login(event: Event): void {
+  event.preventDefault();
+    // 1) Validar campos
+    if (!this.correo.trim() || !this.contrasenna.trim()) {
+      this.toastMessage = 'Faltan datos';
+      this.toastColor   = 'danger';
+      this.isToastOpen  = true;
+      return;
     }
-  }
 
+    
+    const buscarDatos = {
+      correo: this.correo.trim(),
+      contrasenna: this.contrasenna
+    };
+
+ 
+    this.http.post<any>(
+      'http://localhost:3000/guardar_datos/login.php',
+      buscarDatos,
+      { headers: { 'Content-Type': 'application/json' } }
+      ).subscribe(
+      res => {
+        console.log('Respuesta del servidor:', res);
+
+        if (res.success) {
+          this.toastMessage = `Bienvenida, ${res.usuario.nombre}`;
+          this.toastColor   = 'success';
+          this.isToastOpen  = true;
+          this.animateSuccess();
+
+          localStorage.setItem('usuario', JSON.stringify(res.usuario));
+          this.router.navigateByUrl('/home');
+        } else {
+          this.toastMessage = res.message || 'Credenciales incorrectas';
+          this.toastColor   = 'danger';
+          this.isToastOpen  = true;
+          this.animateError();
+        }
+      },
+      err => {
+        console.error('Error en la petición:', err);
+        this.toastMessage = 'Error de conexión con el servidor';
+        this.toastColor   = 'danger';
+        this.isToastOpen  = true;
+        this.animateError();
+      }
+    );
+  }
   
 
   animateSuccess() {
     const animation = createAnimation()
-      .addElement(this.emailInput.nativeElement)
-      .addElement(this.passwordInput.nativeElement)
+      .addElement(this.correoInput.nativeElement)
+      .addElement(this.contrasennaInput.nativeElement)
       .duration(400)
       .keyframes([
         { offset: 0, transform: 'scale(1)', background: 'transparent' },
@@ -57,8 +92,8 @@ constructor(private router: Router, private http: HttpClient) {} // Agrega HttpC
 
   animateError() {
     const animation = createAnimation()
-      .addElement(this.emailInput.nativeElement)
-      .addElement(this.passwordInput.nativeElement)
+      .addElement(this.correoInput.nativeElement)
+      .addElement(this.contrasennaInput.nativeElement)
       .duration(100)
       .iterations(3)
       .keyframes([
@@ -73,5 +108,11 @@ constructor(private router: Router, private http: HttpClient) {} // Agrega HttpC
   }
   goToRegistro() {
   this.router.navigateByUrl('/registro');}
+
+  goToHome() {
+    this.router.navigateByUrl('/home');
+  
+  }
+
 
 }
