@@ -27,6 +27,7 @@ export class RegistroPage {
   showToast = false;
   toastMessage = '';
   toastColor: 'success' | 'danger' = 'success';
+  isToastOpen = false;
 
   private presentToast(message: string, color: 'success' | 'danger') {
     this.toastMessage = message;
@@ -67,7 +68,7 @@ export class RegistroPage {
             this.presentToast('Usuario registrado correctamente', 'success');
             setTimeout(() => this.router.navigateByUrl('/login'), 2000);
           } else {
-            this.presentToast(res.message, 'danger');
+            this.isToastOpen = true;
           }
         },
         error: () => {

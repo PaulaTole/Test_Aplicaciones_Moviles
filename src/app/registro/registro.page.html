@@ -15,9 +15,9 @@
 </form>
 
 <ion-toast
-  [isOpen]="showToast"
-  [message]="toastMessage"
+  [isOpen]="isToastOpen"
+  message="Campos imcompletos"
   [color]="toastColor"
-  duration="2000"
-  (didDismiss)="showToast = false">
-</ion-toast>
+  [duration]="5000"
+  (didDismiss)="isToastOpen = false"
+></ion-toast>

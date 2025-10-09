@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
+
 export interface post {
 
   userid: number;
@@ -17,11 +18,11 @@ export class Post {
 
   private urlApi = "";
 
-  constructor(private Httpclient : HttpClient) {};
+  constructor(private httpClient : HttpClient) {};
 
-  /*getPost():Observable.Post[]> {
-    return this.HttpClient.getPost[]>(this.urlApi);
+  getPosts(): Observable<Post[]> {
+    return this.httpClient.get<Post[]>(this.urlApi);
   }
-*/
-  
+
+
 }
