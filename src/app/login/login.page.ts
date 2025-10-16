@@ -4,14 +4,18 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { createAnimation } from '@ionic/angular';
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonInput, IonButton, IonInputPasswordToggle, IonItem, IonToast } from '@ionic/angular/standalone';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { PostService } from '../Service/post-service';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
   standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule, IonInput, IonButton, IonInputPasswordToggle, IonItem, IonToast, HttpClientModule]
+  imports: [
+    IonContent, IonHeader, IonTitle, IonToolbar,
+    CommonModule, FormsModule,
+    IonInput, IonButton, IonInputPasswordToggle, IonItem, IonToast
+  ]
 })
 export class LoginPage {
   correo = '';
@@ -20,61 +24,46 @@ export class LoginPage {
   toastMessage = '';
   toastColor: 'danger' | 'success' = 'danger';
 
-  @ViewChild('correoInput',     { read: ElementRef }) correoInput!: ElementRef;
-  @ViewChild('contrasennaInput',{ read: ElementRef }) contrasennaInput!: ElementRef;
+  @ViewChild('correoInput', { read: ElementRef }) correoInput!: ElementRef;
+  @ViewChild('contrasennaInput', { read: ElementRef }) contrasennaInput!: ElementRef;
 
-  constructor(private router: Router, private http: HttpClient) {}
+  constructor(private router: Router, private postService: PostService) {}
 
   login(event: Event): void {
-  event.preventDefault();
-    // 1) Validar campos
+    event.preventDefault();
+
     if (!this.correo.trim() || !this.contrasenna.trim()) {
-      this.toastMessage = 'Faltan datos';
-      this.toastColor   = 'danger';
-      this.isToastOpen  = true;
+      this.showToast('Faltan datos', 'danger');
       return;
     }
 
-    
-    const buscarDatos = {
-      correo: this.correo.trim(),
-      contrasenna: this.contrasenna
-    };
-
- 
-    this.http.post<any>(
-      'http://localhost:3000/guardar_datos/login.php',
-      buscarDatos,
-      { headers: { 'Content-Type': 'application/json' } }
-      ).subscribe(
-      res => {
+    this.postService.login(this.correo.trim(), this.contrasenna).subscribe({
+      next: res => {
         console.log('Respuesta del servidor:', res);
 
         if (res.success) {
-          this.toastMessage = `Bienvenida, ${res.usuario.nombre}`;
-          this.toastColor   = 'success';
-          this.isToastOpen  = true;
+          this.showToast(`Bienvenida, ${res.usuario?.nombre}`, 'success');
           this.animateSuccess();
-
           localStorage.setItem('usuario', JSON.stringify(res.usuario));
           this.router.navigateByUrl('/home');
         } else {
-          this.toastMessage = res.message || 'Credenciales incorrectas';
-          this.toastColor   = 'danger';
-          this.isToastOpen  = true;
+          this.showToast(res.message || 'Credenciales incorrectas', 'danger');
           this.animateError();
         }
       },
-      err => {
+      error: err => {
         console.error('Error en la petición:', err);
-        this.toastMessage = 'Error de conexión con el servidor';
-        this.toastColor   = 'danger';
-        this.isToastOpen  = true;
+        this.showToast('Error de conexión con el servidor', 'danger');
         this.animateError();
       }
-    );
+    });
   }
-  
+
+  showToast(message: string, color: 'danger' | 'success') {
+    this.toastMessage = message;
+    this.toastColor = color;
+    this.isToastOpen = true;
+  }
 
   animateSuccess() {
     const animation = createAnimation()
@@ -86,7 +75,6 @@ export class LoginPage {
         { offset: 0.5, transform: 'scale(1.05)', background: '#d4edda' },
         { offset: 1, transform: 'scale(1)', background: 'transparent' }
       ]);
-
     animation.play();
   }
 
@@ -103,16 +91,14 @@ export class LoginPage {
         { offset: 0.75, transform: 'translateX(-10px)' },
         { offset: 1, transform: 'translateX(0px)' }
       ]);
-
     animation.play();
   }
+
   goToRegistro() {
-  this.router.navigateByUrl('/registro');}
+    this.router.navigateByUrl('/registro');
+  }
 
   goToHome() {
     this.router.navigateByUrl('/home');
-  
   }
-
-
 }

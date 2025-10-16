@@ -1,12 +1,15 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-export interface Post {
-  userId: number;
-  id: number;
-  title: string;
-  body: string;
+export interface LoginResponse {
+  success: boolean;
+  message?: string;
+  usuario?: {
+    id: number;
+    nombre: string;
+    correo: string;
+  };
 }
 
 @Injectable({
@@ -14,15 +17,14 @@ export interface Post {
 })
 export class PostService {
 
-  private urlApi = "http://localhost:3000/guardar_datos/login.php'";
+  private apiUrl = 'http://localhost:3000/guardar_datos/login.php';
 
-  constructor(private httpClient: HttpClient) {}
+  constructor(private http: HttpClient) {}
 
-  getPosts(): Observable<Post[]> {
-    return this.httpClient.get<Post[]>(this.urlApi);
+  login(correo: string, contrasenna: string): Observable<LoginResponse> {
+    const body = { correo, contrasenna };
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+
+    return this.http.post<LoginResponse>(this.apiUrl, body, { headers });
   }
-
-  //definir la llamada al servicio
-  //definir la interface que van a usar
-  
 }
