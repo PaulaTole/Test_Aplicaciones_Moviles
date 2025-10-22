@@ -17,7 +17,7 @@ export interface LoginResponse {
 })
 export class PostService {
 
-  private apiUrl = 'http://localhost:3000/guardar_datos/login.php';
+  private apiUrl = '';
 
   constructor(private http: HttpClient) {}
 
