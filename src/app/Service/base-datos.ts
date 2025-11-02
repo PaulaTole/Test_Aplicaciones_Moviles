@@ -23,7 +23,7 @@ export class BaseDatos {
       console.log("Base de datos creada");
 
       await this.db.executeSql(
-        'CREATE TABLE IF NOT EXISTS usuarios (id INTEGER PRIMARY KEY AUTOINCREMENT, nombre TEXT, email TEXT, password TEXT)', []
+        'CREATE TABLE IF NOT EXISTS usuarios (id INTEGER PRIMARY KEY AUTOINCREMENT, nombre TEXT, correo TEXT, contrasenna TEXT)', []
       );
 
       console.log("Tabla creada");
@@ -31,27 +31,22 @@ export class BaseDatos {
       console.log("Ocurrió un error al crear la base de datos", e);
     }
   }
-
-  async insertarUsuario() {
-    try {
-      if (!this.db) {
-        console.log('La base de datos no está inicializada.');
-        return;
-      }
-
-      const nombre = 'Juan Pérez';
-      const email = 'juan.perez@example.com';
-      const password = '123456';
-
-      await this.db.executeSql(
-        'INSERT INTO usuarios (nombre, email, password) VALUES (?, ?, ?)',
-        [nombre, email, password]
-      );
-
-      console.log('Usuario insertado correctamente');
-    } catch (e) {
-      console.error('Error al insertar usuario', e);
+  async insertarUsuario(nombre: string, correo: string, contrasenna: string) {
+  try {
+    if (!this.db) {
+      console.log('La base de datos no está inicializada.');
+      return;
     }
+
+    await this.db.executeSql(
+      'INSERT INTO usuarios (nombre, correo, contrasenna) VALUES (?, ?, ?)',
+      [nombre, correo, contrasenna]
+    );
+
+    console.log('Usuario insertado correctamente');
+  } catch (e) {
+    console.error('Error al insertar usuario', e);
+  }
   }
 
   async obtenerUsuarios(): Promise<any[]> {
