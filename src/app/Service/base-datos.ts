@@ -1,30 +1,51 @@
+import { SQLiteObject } from '@awesome-cordova-plugins/sqlite/ngx';
 import { Platform } from '@ionic/angular';
 import { Injectable } from '@angular/core';
-import { SQLite, SQLiteObject } from '@awesome-cordova-plugins/sqlite/ngx';
+import { SQLiteMock } from './sqlite-browser-mock';
 
-@Injectable({
-  providedIn: 'root'
-})
+let SQLite: any;
+
+if (typeof window !== 'undefined' && window.navigator) {
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(window.navigator.userAgent);
+
+  if (isMobile) {
+    import('@awesome-cordova-plugins/sqlite/ngx').then(module => {
+      SQLite = module.SQLite;
+    });
+  } else {
+    import('./sqlite-browser-mock').then(module => {
+      SQLite = module.SQLiteMock;
+    });
+  }
+}
+
+@Injectable({ providedIn: 'root' })
 export class BaseDatos {
-
   private db: SQLiteObject | null = null;
+  private sqlite: any;
 
-  constructor(private sqlite: SQLite, private platform: Platform) {}
+  constructor(private platform: Platform) {
+    const isMobile = this.platform.is('cordova') || this.platform.is('capacitor');
+    this.sqlite = isMobile ? new (window as any).SQLite() : new SQLiteMock();
+  }
 
   async crearBD() {
     try {
       await this.platform.ready();
 
+      if (this.platform.is('cordova') || this.platform.is('capacitor')) {
       this.db = await this.sqlite.create({
         name: 'usuarios.db',
         location: 'default'
       });
 
-      console.log("Base de datos creada");
-
-      await this.db.executeSql(
-        'CREATE TABLE IF NOT EXISTS usuarios (id INTEGER PRIMARY KEY AUTOINCREMENT, nombre TEXT, correo TEXT, contrasenna TEXT)', []
+      await this.db?.executeSql(
+        'CREATE TABLE IF NOT EXISTS usuarios (id INTEGER PRIMARY KEY AUTOINCREMENT, nombre TEXT, correo TEXT, contrasenna TEXT)',
+        []
       );
+    } else {
+      console.warn('SQLite no está disponible en el navegador.');
+    }
 
       console.log("Tabla creada");
     } catch (e) {
@@ -69,4 +90,19 @@ export class BaseDatos {
       return [];
     }
   }
+
+  async validarUsuario(correo: string, contrasenna: string): Promise<boolean> {
+  if (!this.db) {
+    console.log('La base de datos no está inicializada.');
+    return false;
+  }
+
+  const result = await this.db.executeSql(
+    'SELECT * FROM usuarios WHERE correo = ? AND contrasenna = ?',
+    [correo, contrasenna]
+  );
+
+  return result.rows.length > 0;
+}
+
 }

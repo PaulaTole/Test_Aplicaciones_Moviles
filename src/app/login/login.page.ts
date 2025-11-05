@@ -5,6 +5,8 @@ import { Router } from '@angular/router';
 import { createAnimation } from '@ionic/angular';
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonInput, IonButton, IonToast, IonLabel, IonItem, IonInputPasswordToggle} from '@ionic/angular/standalone';
 import { PostService } from '../Service/post-service';
+import { firstValueFrom } from 'rxjs';
+import { BaseDatos } from '../Service/base-datos';
 
 @Component({
   selector: 'app-login',
@@ -17,6 +19,7 @@ export class LoginPage implements AfterViewInit {
   correo = '';
   contrasenna = '';
   isToastOpen = false;
+  showToast = false;
   toastMessage = '';
   toastColor: 'danger' | 'success' = 'danger';
   loading = false;
@@ -24,51 +27,54 @@ export class LoginPage implements AfterViewInit {
   @ViewChild('correoInput', { read: ElementRef }) correoInput!: ElementRef;
   @ViewChild('contrasennaInput', { read: ElementRef }) contrasennaInput!: ElementRef;
 
-  constructor(private router: Router, private auth: PostService) {}
+  constructor(private router: Router, private auth: PostService, private db: BaseDatos) {}
 
   ngAfterViewInit() {}
-
-  login(event: Event): void {
-    event.preventDefault();
-    if (this.loading) return;
-    if (!this.correo.trim() || !this.contrasenna.trim()) {
-      this.showToast('Faltan datos', 'danger');
-      this.animateError();
-      return;
-    }
-
-    this.loading = true;
-    this.auth.login(this.correo.trim(), this.contrasenna)
-      .subscribe({
-        next: (res: any) => {
-          this.loading = false;
-          if (res?.success) {
-            this.showToast(`Bienvenida, ${res.usuario?.nombre}`, 'success');
-            if (this.correoInput && this.contrasennaInput) this.animateSuccess();
-            // almacenar token/usuario según respuesta
-            if (res.usuario) localStorage.setItem('usuario', JSON.stringify(res.usuario));
-            if (res.token) localStorage.setItem('token', res.token);
-            this.router.navigateByUrl('/home');
-          } else {
-            this.showToast(res?.message || 'Credenciales incorrectas', 'danger');
-            this.animateError();
-          }
-        },
-        error: (err) => {
-          this.loading = false;
-          console.error('login error', err);
-          this.showToast('Error de conexión con el servidor', 'danger');
-          this.animateError();
-        }
-      });
-  }
-
-  showToast(message: string, color: 'danger' | 'success') {
+    
+  private presentToast(message: string, color: 'success' | 'danger') {
     this.toastMessage = message;
     this.toastColor = color;
-    this.isToastOpen = true;
-    setTimeout(() => this.isToastOpen = false, 2500);
+    this.showToast = true;
+    setTimeout(() => this.showToast = false, 2500);
   }
+
+  async login(event: Event) {
+  this.loading = true;
+  event.preventDefault();
+
+  try {
+    const res = await firstValueFrom(this.auth.login(this.correo.trim(), this.contrasenna.trim()));
+
+    if (res?.success) {
+      this.presentToast('Inicio de sesión exitoso (servidor)', 'success');
+      this.router.navigateByUrl('/home');
+    } else {
+      this.presentToast(res?.message || 'Credenciales inválidas', 'danger');
+    }
+
+  } catch (error) {
+    console.warn('Servidor no disponible, intentando login local...');
+    const valido = await this.db.validarUsuario(this.correo.trim(), this.contrasenna.trim());
+
+    if (valido) {
+      this.openToast('Inicio de sesión local exitoso', 'success');
+      this.router.navigateByUrl('/home');
+    } else {
+      this.openToast('Credenciales inválidas (local)', 'danger');
+    }
+  }
+
+  this.loading = false;
+}
+
+
+  openToast(message: string, color: 'danger' | 'success') {
+  this.toastMessage = message;
+  this.toastColor = color;
+  this.isToastOpen = true;
+  setTimeout(() => this.isToastOpen = false, 2500);
+}
+
 
   animateSuccess() {
     if (!this.correoInput || !this.contrasennaInput) return;
