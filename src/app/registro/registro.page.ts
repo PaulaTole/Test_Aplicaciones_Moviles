@@ -2,13 +2,13 @@ import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { createAnimation } from '@ionic/angular';
+import { createAnimation, ToastController  } from '@ionic/angular';
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonInput, IonButton, IonItem, IonToast, IonLabel} from '@ionic/angular/standalone';
 import { firstValueFrom } from 'rxjs';
 
 import { PostService } from '../Service/post-service';
 import { BaseDatos } from '../Service/base-datos';
-
+import { __await } from 'tslib';
 
 @Component({
   selector: 'app-registro',
@@ -31,7 +31,7 @@ export class RegistroPage implements AfterViewInit {
   toastColor: 'success' | 'danger' = 'success';
   loading = false;
 
-  constructor(private router: Router, private auth: PostService, private db: BaseDatos) {};
+  constructor(private router: Router, private auth: PostService, private db: BaseDatos,private toastController: ToastController) {};
   
 
   ngAfterViewInit() {
@@ -43,59 +43,64 @@ export class RegistroPage implements AfterViewInit {
     this.showToast = true;
     setTimeout(() => this.showToast = false, 2500);
   }
-async registrar(event: Event) {
-  event.preventDefault();
-  const res = await firstValueFrom(this.auth.register(this.nombre, this.correo, this.contrasenna));
-  if (this.loading) return;
+  async registrar(event: Event) {
+      event.preventDefault();
+      const res = await firstValueFrom(this.auth.register(this.nombre, this.correo, this.contrasenna));
+      if (this.loading) return;
 
-  // Validaciones
-  if (!this.nombre.trim() || !this.correo.trim() || !this.contrasenna) {
-    this.presentToast('Todos los campos son obligatorios', 'danger');
-    this.animateError();
-    return;
-  }
+      // Validaciones
+      if (!this.nombre.trim() || !this.correo.trim() || !this.contrasenna) {
+       await this.animateError(this.nombreInput||this.emailInput||this.contrasennaInput, 'Todos los campos son obligatorios');
+        return;
+      }
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(this.correo)) {
-    this.presentToast('El correo no es válido', 'danger');
-    this.animateError();
-    return;
-  }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(this.correo)) {
+        await this.animateError(this.emailInput, 'El correo es obligatorio');
+        return;
+      }
 
-  if (this.contrasenna.length < 8) {
-    this.presentToast('La contraseña debe tener al menos 8 caracteres', 'danger');
-    this.animateError();
-    return;
-  }
+      if (this.contrasenna.length < 8) {
+        await this.animateError(this.contrasennaInput, 'La contraseña debe tener 8 caracteres');
+        return;
+      }
 
-  this.loading = true;
+      this.loading = true;
 
-  try {
-    // Intentar registrar en el servidor remoto
-    const res = await this.auth.register(this.nombre.trim(), this.correo.trim(), this.contrasenna).toPromise();
+try {
+      // Verificar campos vacíos
+      if (!this.nombre || !this.correo || !this.contrasenna) {
+        await this.mostrarToast('Completa todos los campos');
+        return;
+      }
 
-    if (res?.success) {
-      this.presentToast('Usuario registrado correctamente (servidor)', 'success');
-      this.animateSuccess();
-    } else {
-      this.presentToast(res?.message || 'Error al registrar en servidor', 'danger');
-      this.animateError();
+      // Intentar registrar normalmente en la BD
+      const registrado = await this.db.insertarUsuario(
+        this.nombre,
+        this.correo,
+        this.contrasenna
+      );
+
+      if (registrado) {
+        await this.mostrarToast('Usuario registrado correctamente');
+        this.router.navigate(['/login']);
+      } else {
+        throw new Error('Fallo al registrar en BD');
+      }
+    } catch (error) {
+      console.warn('Fallo al registrar, usando modo tester:', error);
+
+      // Crear usuario tester si BD no disponible
+      if (this.correo === 'tester@test.com' && this.contrasenna === '12345678') {
+        localStorage.setItem('modoTester', 'true');
+        await this.mostrarToast('Modo tester activado');
+        this.router.navigate(['/home']);
+      } else {
+        await this.mostrarToast(
+          'No se pudo registrar. Usa tester@test.com / 12345678 para modo local.'
+        );
+      }
     }
-
-  } catch (error) {
-    console.error('Error al conectar con el servidor:', error);
-    this.presentToast('Servidor no disponible, guardando localmente...', 'danger');
-    this.animateError();
-
-    // Guardar en SQLite como respaldo
-    try {
-      await this.db.insertarUsuario(this.nombre.trim(), this.correo.trim(), this.contrasenna.trim());
-      this.presentToast('Usuario guardado localmente', 'success');
-    } catch (e) {
-      console.error('Error al guardar en SQLite:', e);
-      this.presentToast('No se pudo guardar localmente', 'danger');
-    }
-  }
 
   this.loading = false;
   setTimeout(() => this.router.navigateByUrl('/login'), 1000);
@@ -117,7 +122,7 @@ async registrar(event: Event) {
     animation.play();
   }
 
-  animateError() {
+/*  animateError() {
     if (!this.emailInput || !this.contrasennaInput) return;
     const animation = createAnimation()
       .addElement(this.emailInput.nativeElement)
@@ -132,5 +137,43 @@ async registrar(event: Event) {
         { offset: 1, transform: 'translateX(0px)' }
       ]);
     animation.play();
+  }*/
+
+  async animateError(element: ElementRef, mensaje: string) {
+  const toast = await this.toastController.create({
+    message: mensaje,
+    duration: 2000,
+    color: 'danger',
+    position: 'bottom',
+  });
+  await toast.present();
+
+  const animation = createAnimation()
+    .addElement(element.nativeElement)
+    .duration(100)
+    .iterations(3)
+    .keyframes([
+      { offset: 0, transform: 'translateX(0px)' },
+      { offset: 0.25, transform: 'translateX(-8px)' },
+      { offset: 0.5, transform: 'translateX(8px)' },
+      { offset: 0.75, transform: 'translateX(-8px)' },
+      { offset: 1, transform: 'translateX(0px)' },
+    ]);
+
+  animation.play();
   }
+
+
+  async mostrarToast(mensaje: string) {
+    const toast = await this.toastController.create({
+      message: mensaje,
+      duration: 2000,
+      position: 'bottom',
+    });
+    toast.present();
+  }
+
+  irALogin() {
+  this.router.navigate(['/login']);
+}
 }
