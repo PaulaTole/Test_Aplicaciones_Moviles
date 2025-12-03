@@ -23,6 +23,21 @@ export class Post {
   getPosts(): Observable<Post[]> {
     return this.httpClient.get<Post[]>(this.urlApi);
   }
+  
+  login(correo: string, contrasenna: string): Observable<any> {
+    const body = { correo, contrasenna };
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json'});
+
+    return this.http.post(`${this.apiUrl}/auth`, { correo, contrasenna }, { headers });
+
+   
+  }
+
+  register(nombre: string, correo: string, contrasenna: string): Observable<any> {
+    const body = { nombre, correo, contrasenna };
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json'});
+    return this.http.post(`${this.registerUrl}/register`, body, { headers });
+  }
 
 
 }

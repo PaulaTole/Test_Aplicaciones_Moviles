@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
+import { BaseDatos } from './service/sql-lite';
 
 @Component({
   selector: 'app-root',
@@ -7,5 +8,9 @@ import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
   imports: [IonApp, IonRouterOutlet],
 })
 export class AppComponent {
-  constructor() {}
+  constructor(private bd: BaseDatos) {}
+
+    async ngOnInit() {
+      await this.bd.crearBD();
+}
 }

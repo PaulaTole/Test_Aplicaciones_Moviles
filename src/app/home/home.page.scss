@@ -25,3 +25,30 @@
 #container a {
   text-decoration: none;
 }
+
+.user-header {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  gap: 12px;
+}
+
+.user-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ccc;
+}
+
+.user-info h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.user-info p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+}
