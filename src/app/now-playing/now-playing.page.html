@@ -1,0 +1,51 @@
+<ion-header>
+  <ion-toolbar color="light">
+    <div class="user-header">
+      <img src="assets/icon/default_user_profile.png" class="user-icon"/>
+
+      <div class="user-info">
+        <h2>{{ usuarios[0]?.nombre }}</h2>
+        <p>{{ usuarios[0]?.correo }}</p>
+      </div>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <h1 class="section-title">Reproduciendo ahora</h1>
+
+  <ion-card *ngIf="currentTrack">
+    <ion-card-header>
+      <ion-card-title>{{ currentTrack.name }}</ion-card-title>
+      <ion-card-subtitle>{{ currentTrack.artist }}</ion-card-subtitle>
+    </ion-card-header>
+
+    <ion-card-content>
+
+      <!-- Barra de progreso -->
+      <ion-item lines="none">
+        <ion-range
+          [min]="0"
+          [max]="duration"
+          [value]="progress"
+        ></ion-range>
+      </ion-item>
+
+      <p>Tiempo: {{ progress | number:'1.0-0' }} / {{ duration | number:'1.0-0' }}</p>
+
+      <!-- Controles -->
+      <div class="controls">
+        <ion-button (click)="prev()">⏮️</ion-button>
+
+        <ion-button *ngIf="!isPlaying" (click)="resumeTrack()">▶️</ion-button>
+
+        <ion-button *ngIf="isPlaying" color="danger" (click)="pauseTrack()">⏸️</ion-button>
+
+        <ion-button (click)="next()">⏭️</ion-button>
+      </div>
+
+    </ion-card-content>
+  </ion-card>
+
+</ion-content>

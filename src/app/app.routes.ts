@@ -17,6 +17,14 @@ export const routes: Routes = [
   {
     path: 'registro',
     loadComponent: () => import('./registro/registro.page').then( m => m.RegistroPage)
+  },  {
+    path: 'now-playing',
+    loadComponent: () => import('./now-playing/now-playing.page').then( m => m.NowPlayingPage)
   },
+  {
+    path: 'perfil',
+    loadComponent: () => import('./perfil/perfil.page').then( m => m.PerfilPage)
+  },
+
 
 ];

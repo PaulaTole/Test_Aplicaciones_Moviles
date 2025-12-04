@@ -126,4 +126,21 @@ export class AudioService {
   getCurrentTrack() {
     return this.playlist[this.currentIndex];
   }
+
+  getProgress(): number | null {
+  if (!this.player) return null;
+  return this.player.seek() as number;
+  }
+
+  getDuration(): number {
+    if (!this.player) return 1;
+    return this.player.duration();
+  }
+
+  seek(value: number) {
+    if (this.player) {
+      this.player.seek(value);
+    }
+  }
+
 }
