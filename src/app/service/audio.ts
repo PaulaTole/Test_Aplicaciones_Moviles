@@ -18,6 +18,7 @@ export class AudioService {
 
   // ------- PLAYLIST -------
   playlist: Track[] = [];
+  public playlist$ = new BehaviorSubject<Track[]>([]);
 
   private player!: Howl;   // reproductor principal
   private currentIndex: number = 0;
@@ -33,6 +34,7 @@ export class AudioService {
   private loadPlaylist() {
     this.http.get<Track[]>('assets/audio/audio.json').subscribe(data => {
       this.playlist = data;
+      this.playlist$.next(data);
     })}
 
   // -------------------------

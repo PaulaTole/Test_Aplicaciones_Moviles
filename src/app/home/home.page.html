@@ -1,80 +1,43 @@
 <ion-header>
   <ion-toolbar color="light">
-
-    <!-- MENÚ DESPLEGABLE -->
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
 
-    <div class="user-header">
-      <img src="assets/icon/default_user_profile.png" class="user-icon" />
-
+    <div class="user-header" style="display:flex; align-items:center; gap:12px;">
+      <img src="assets/icon/default_user_profile.png" class="user-icon" style="width:40px;height:40px;border-radius:50%;"/>
       <div class="user-info">
-        <h2>{{ usuarios[0]?.nombre }}</h2>
-        <p>{{ usuarios[0]?.correo }}</p>
+        <h3 style="margin:0;">{{ usuarios[0]?.nombre || 'Usuario' }}</h3>
+        <p style="margin:0;font-size:12px;color:gray;">{{ usuarios[0]?.correo || '' }}</p>
       </div>
     </div>
-
   </ion-toolbar>
 </ion-header>
 
-<!-- MENÚ LATERAL (Mismo que en Home) -->
-<ion-menu side="start" menuId="main-menu" contentId="now-playing-content">
-  <ion-header>
-    <ion-toolbar color="light">
-      <ion-title>Menú</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content>
+  <h2 style="padding:16px 16px 0 16px;">Reproductor</h2>
 
-  <ion-content>
-    <ion-list>
+  <ion-list>
+    <ion-item *ngFor="let track of tracks; let i = index">
+      <ion-thumbnail slot="start">
+        <ion-button fill="clear" (click)="irANowPlaying()" class="music-launcher">
+          <img src="assets/icon/music_icon.png" class="mini-music-icon" style="width:40px;height:40px;">
+        </ion-button>
+      </ion-thumbnail>
 
-      <ion-item button routerLink="/home">
-        🏠 Home
-      </ion-item>
+      <ion-label>
+        <h3>{{ track.name }}</h3>
+      </ion-label>
 
-      <ion-item button routerLink="/perfil">
-        👤 Editar Perfil
-      </ion-item>
+      <ion-button *ngIf="currentIndex !== i || !isPlaying" (click)="playTrack(i)">
+        ▶️
+      </ion-button>
 
-      <ion-item button (click)="logout()">
-        🚪 Logout
-      </ion-item>
+      <ion-button *ngIf="currentIndex === i && isPlaying" color="danger" (click)="pauseTrack()">⏸️</ion-button>
+    </ion-item>
 
-    </ion-list>
-  </ion-content>
-</ion-menu>
-
-<!-- CONTENIDO PRINCIPAL -->
-<ion-content id="now-playing-content">
-
-  <h2 class="section-title">Now Playing</h2>
-
-  <ion-item>
-    <ion-label>
-      <h2>{{ currentTrack?.name }}</h2>
-      <p>{{ progress | number:'1.0-0' }} / {{ duration | number:'1.0-0' }} sec</p>
-    </ion-label>
-  </ion-item>
-
-  <!-- Barra de progreso -->
-  <ion-item>
-    <ion-range
-      [min]="0"
-      [max]="duration"
-      [value]="progress"
-      (ionChange)="seekTrack($event)">
-    </ion-range>
-  </ion-item>
-
-  <!-- Controles -->
-  <div style="display: flex; justify-content: center; gap: 20px; margin-top: 20px;">
-    <ion-button (click)="prev()">⏮️</ion-button>
-
-    <ion-button *ngIf="!isPlaying" (click)="resumeTrack()">▶️</ion-button>
-    <ion-button *ngIf="isPlaying" color="danger" (click)="pauseTrack()">⏸️</ion-button>
-
-    <ion-button (click)="next()">⏭️</ion-button>
-  </div>
-
+    <ion-item *ngIf="currentTrack">
+      <ion-range [min]="0" [max]="duration" [value]="progress" (ionChange)="seekTrack($event)"></ion-range>
+    </ion-item>
+  </ion-list>
 </ion-content>

@@ -26,7 +26,25 @@ class SQLiteWebMock {
         correo: values?.[1],
         contrasenna: values?.[2],
       };
-      this.data.push(usuario);
+      // Evitar duplicados por correo en el mock (varias llamadas a crearBD)
+      const exists = this.data.some(u => u.correo === usuario.correo);
+      if (!exists) {
+        this.data.push(usuario);
+      }
+    }
+
+    if (statement.startsWith('UPDATE usuarios SET')) {
+      const [nombre, correo, contrasenna, id] = values || [];
+
+      const index = this.data.findIndex(u => u.id === id);
+      if (index !== -1) {
+        this.data[index] = {
+          ...this.data[index],
+          nombre,
+          correo,
+          contrasenna
+        };
+      }
     }
 
     return { changes: { changes: 1 } };
@@ -42,6 +60,11 @@ class SQLiteWebMock {
           (u) => u.correo === correo && u.contrasenna === contrasenna
         ),
       };
+    }
+
+    if (statement.includes('WHERE id = ?')) {
+      const [id] = values || [];
+      return { values: this.data.filter(u => u.id === id) };
     }
 
     if (statement.startsWith('SELECT * FROM usuarios')) {
@@ -144,6 +167,64 @@ export class BaseDatos {
       console.error('❌ Error al obtener usuarios:', e);
       return [];
     }
+  }
+  /*Solo 1 usuario */
+   async getUsuarioPorId(id: number): Promise<any | null> {
+  if (!this.db) return null;
+
+  try {
+    const result = await this.db.query(
+      'SELECT * FROM usuarios WHERE id = ?',
+      [id]
+    );
+
+    return result.values?.length ? result.values[0] : null;
+  } catch (e) {
+    console.error('❌ Error al obtener usuario por id:', e);
+    return null;
+  }
+}
+  /* actualizar usuario */
+  async actualizarUsuario(
+  id: number,
+  nombre: string,
+  correo: string,
+  contrasenna: string
+  ) 
+  {
+  if (!this.db) return false;
+
+  try {
+    await this.db.run(
+      'UPDATE usuarios SET nombre = ?, correo = ?, contrasenna = ? WHERE id = ?',
+      [nombre, correo, contrasenna, id]
+    );
+
+    return true;
+  } catch (e) {
+    console.error('❌ Error al actualizar usuario:', e);
+    return false;
+  }
+  }
+
+  /* guardar usuario */
+  async guardarUsuario(usuario: any) {
+  if (!usuario.id) {
+    // Nuevo
+    return await this.insertarUsuario(
+      usuario.nombre,
+      usuario.correo,
+      usuario.contrasenna
+    );
+  }
+
+  // Existente → actualizar
+  return await this.actualizarUsuario(
+    usuario.id,
+    usuario.nombre,
+    usuario.correo,
+    usuario.contrasenna
+  );
   }
 
   /* Login */

@@ -1,147 +1,95 @@
-import { Component, OnInit, inject, OnDestroy } from '@angular/core';
-import {
-  IonHeader, IonToolbar, IonContent, IonList, IonItem, IonLabel,
-  IonButton, IonRange, IonThumbnail, IonMenu, IonTitle, IonButtons,
-  IonMenuButton
-} from '@ionic/angular/standalone';
-import { CommonModule } from '@angular/common';
-import { Subscription, interval } from 'rxjs';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subscription, interval } from 'rxjs';
+import { CommonModule } from '@angular/common';
+import { IonicModule } from '@ionic/angular';
 
-import { BaseDatos } from '../service/sql-lite';
 import { AudioService, Track } from '../service/audio';
+import { BaseDatos } from '../service/sql-lite';
 
 @Component({
   selector: 'app-home',
-  standalone: true,
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
-  imports: [
-    IonHeader, IonToolbar, IonContent, IonList, IonItem,
-    IonLabel, IonButton, IonRange, CommonModule, IonThumbnail, IonMenu, IonTitle,
-    IonButtons, IonMenuButton
-  ],
+  standalone: true,
+  imports: [IonicModule, CommonModule],
 })
 export class HomePage implements OnInit, OnDestroy {
-
-  private sql = inject(BaseDatos);
-  private audio = inject(AudioService);
-
-  usuarios: any[] = [];
-
   tracks: Track[] = [];
   currentTrack: Track | null = null;
-  currentIndex = -1;
   isPlaying = false;
+  currentIndex = -1;
 
   progress = 0;
   duration = 1;
 
+  usuarios: any[] = [];
+
   private subs: Subscription[] = [];
-  constructor(private router: Router) {};
 
-  ngOnInit() {
-    this.iniciarBaseDatos();
-    this.cargarPlaylist();
-    this.iniciarSubscripciones();
+  constructor(
+    public audioService: AudioService,
+    private router: Router,
+    private bd: BaseDatos
+  ) {}
+
+  async ngOnInit() {
+    // carga usuarios (mock o sqlite según plataforma)
+    await this.bd.crearBD();
+    try {
+      this.usuarios = await this.bd.obtenerUsuarios();
+    } catch (e) {
+      console.error('❌ Error al cargar usuarios en HomePage:', e);
+      this.usuarios = [];
+    }
+
+    // playlist (AudioService carga el JSON en su constructor)
+    // Suscribirse al playlist$ para actualizar cuando llegue la respuesta HTTP
+    this.subs.push(
+      this.audioService.playlist$.subscribe(list => {
+        this.tracks = list || [];
+      })
+    );
+
+    // suscripciones
+    this.subs.push(
+      this.audioService.trackInfo$.subscribe(track => {
+        this.currentTrack = track;
+        // currentIndex lo guarda el servicio
+        (this.currentIndex as any) = (this.audioService as any).currentIndex ?? -1;
+      })
+    );
+
+    this.subs.push(this.audioService.isPlaying$.subscribe(v => (this.isPlaying = v)));
+
+    // loop de progreso
+    this.subs.push(
+      interval(400).subscribe(() => {
+        const p = this.audioService.getProgress();
+        if (p !== null) this.progress = p;
+        this.duration = this.audioService.getDuration();
+      })
+    );
   }
 
-  // -----------------------
-  // Usuarios (SQLite)
-  // -----------------------
-  async iniciarBaseDatos() {
-    await this.sql.crearBD();
-    this.sql.obtenerUsuarios().then(users => this.usuarios = users);
-  }
-
-  // -----------------------
-  // Playlist
-  // -----------------------
-  cargarPlaylist() {
-    setTimeout(() => {
-      this.tracks = this.audio.playlist;
-      console.log("Tracks cargados:", this.tracks);
-    }, 300);
-  }
-
-  // -----------------------
-  // Observables Audio
-  // -----------------------
-  iniciarSubscripciones() {
-    this.audio.trackInfo$.subscribe(track => {
-      this.currentTrack = track;
-
-      if (track) {
-        this.duration = this.audio.getDuration();
-      }
-    });
-
-    this.audio.isPlaying$.subscribe(p => {
-      this.isPlaying = p;
-    });
-  }
-
-  // -----------------------
-  // Reproductor
-  // -----------------------
-  playTrack(index: number) {
-    this.currentIndex = index;
-    this.audio.playTrack(index);
-    this.startProgressLoop();
+  playTrack(i: number) {
+    this.audioService.playTrack(i);
   }
 
   pauseTrack() {
-    this.audio.pauseTrack();
+    this.audioService.pauseTrack();
   }
 
-  resumeTrack() {
-  this.audio.resumeTrack();
-  } 
-
-
-  next() {
-    this.audio.nextTrack();
+  seekTrack(ev: any) {
+    const val = ev?.detail?.value;
+    if (typeof val === 'number') this.audioService.seek(val);
   }
 
-  prev() {
-    this.audio.prevTrack();
-  }
-
-  // -----------------------
-  // Barra de progreso
-  // -----------------------
-  private startProgressLoop() {
-    const loop = interval(300).subscribe(() => {
-      const p = this.audio.getProgress();
-      if (p !== null) {
-        this.progress = p;
-        this.duration = this.audio.getDuration();
-      }
-    });
-
-    this.subs.push(loop);
-  }
-
-  seekTrack(event: any) {
-    let value = event.detail.value;
-
-    if (typeof value === 'object') {
-      value = value.lower;
-    }
-
-    this.audio.seek(value);
+  irANowPlaying() {
+    this.router.navigate(['/now-playing']);
   }
 
   ngOnDestroy() {
     this.subs.forEach(s => s.unsubscribe());
   }
-  irANowPlaying() {
-  this.router.navigate(['/now-playing']);
 }
-  logout() {
-  console.log("logout");
-    this.router.navigate(['/login']);
-  }
-
-}
-

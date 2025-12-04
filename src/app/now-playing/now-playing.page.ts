@@ -1,53 +1,87 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { Subscription, interval } from 'rxjs';
+
+import { AudioService, Track } from '../service/audio';
+import { BaseDatos } from '../service/sql-lite';
 
 @Component({
-  selector: 'app-now-playing',
+  selector: 'app-nowplaying',
   templateUrl: './now-playing.page.html',
   styleUrls: ['./now-playing.page.scss'],
   standalone: true,
-  imports: [
-    IonicModule,   
-    CommonModule,  
-    DecimalPipe    
-  ]
+  imports: [IonicModule, CommonModule, DecimalPipe],
 })
-export class NowPlayingPage {
-
-  usuarios = [{ nombre: 'Usuario', correo: 'correo@correo.com' }];
-
-  currentTrack: any = null;
+export class NowPlayingPage implements OnInit, OnDestroy {
+  usuarios: any[] = [];
+  currentTrack: Track | null = null;
   progress = 0;
-  duration = 0;
+  duration = 1;
   isPlaying = false;
 
-  constructor(private router: Router) {}
+  private subs: Subscription[] = [];
 
-  // -------------------------
-  // Métodos que controlarás desde Home
-  // -------------------------
+  constructor(
+    public audioService: AudioService,
+    private router: Router,
+    private bd: BaseDatos
+  ) {}
+
+  async ngOnInit() {
+    await this.bd.crearBD();
+    this.usuarios = await this.bd.obtenerUsuarios();
+
+    this.subs.push(this.audioService.trackInfo$.subscribe(t => (this.currentTrack = t)));
+    this.subs.push(this.audioService.isPlaying$.subscribe(p => (this.isPlaying = p)));
+
+    this.subs.push(
+      interval(400).subscribe(() => {
+        const p = this.audioService.getProgress();
+        this.progress = p ?? 0;
+        this.duration = this.audioService.getDuration();
+      })
+    );
+  }
+
   prev() {
-    console.log('prev');
+    this.audioService.prevTrack();
   }
 
   next() {
-    console.log('next');
+    this.audioService.nextTrack();
   }
 
   resumeTrack() {
-    console.log('resume');
+    this.audioService.resumeTrack();
   }
 
   pauseTrack() {
-    console.log('pause');
+    this.audioService.pauseTrack();
   }
 
   logout() {
-    console.log("logout");
     this.router.navigate(['/login']);
   }
 
+  goHome() {
+    this.router.navigate(['/home']);
+  }
+
+  ngOnDestroy() {
+    this.subs.forEach(s => s.unsubscribe());
+  }
+  onRangeChange(event: any) {
+  const value = event.detail.value;
+    if (typeof value === 'number') {
+      this.audioService.seek(value);
+      return;
+    }
+
+    if (typeof value === 'object' && value.upper !== undefined) {
+      this.audioService.seek(value.upper);
+    }
+}
 
 }
