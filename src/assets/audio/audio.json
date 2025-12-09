@@ -1,6 +1,7 @@
 [
-  { "name": "GuiltyCrownOP1", "file": "guilty_crown_op1.mp3" },
-  { "name": "Sonic2006", "file": "His_World_(Crush_40_Version).mp3" },
-  { "name": "Sonic_and_the_black_king", "file": "Knight_of_the_Wind.mp3" },
-  { "name": "SmashBrosUltiIntro", "file": "SmashBrosUltimateCover.mp3" }
+  { "name": "GuiltyCrownOP1", "file": "guilty_crown.mp3", "cover": "assets/img/music_icon.jpg" },
+  { "name": "Megalovania", "file": "Megalovania.mp3",  "cover": "assets/img/music_icon.jpg" },
+  { "name": "yume_no_sora", "file": "yume_no_sora.mp3",  "cover": "assets/img/music_icon.jpg" },
+  { "name": "SmashBrosUltiIntro", "file": "smash_bros.mp3",  "cover": "assets/img/music_icon.jpg"},
+  { "name": "Open Your Heart", "file": "open_your_heart.mp3",  "cover": "assets/img/music_icon.jpg" }
 ]

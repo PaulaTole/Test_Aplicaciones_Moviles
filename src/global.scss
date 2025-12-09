@@ -34,4 +34,29 @@
 
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import '@ionic/angular/css/palettes/dark.system.css';
+
+/* --- CSS DEFINITIVO Y LIMPIO --- */
+
+/* 1. Fondo blanco base para evitar pantallas negras */
+html, body, ion-app, ion-content {
+  --background: #ffffff;
+  background-color: #ffffff;
+}
+
+/* 2. Asegurar altura completa */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* 3. SOLO ESTO: Forzar opacidad, pero SIN tocar el display/z-index */
+/* Esto permite que Ionic maneje el orden, nosotros solo aseguramos que se vea */
+.ion-page:not(.ion-page-hidden) {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+ion-content {
+  --background: #ffffff; 
+}

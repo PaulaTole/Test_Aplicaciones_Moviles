@@ -1,4 +1,5 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild, NgZone, ChangeDetectorRef, ApplicationRef } from '@angular/core'; 
+import { NavController } from '@ionic/angular'; 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -33,14 +34,33 @@ export class LoginPage {
 
   constructor(
     private router: Router,
-    private sql: BaseDatos
+    private sql: BaseDatos, 
+    private navCtrl: NavController, 
+    private ngZone: NgZone, 
+    private cd: ChangeDetectorRef,
+    private appRef: ApplicationRef
   ) {}
 
+  ionViewWillEnter() {
+    console.log('🔄 Login: Iniciando protocolo de repintado...');
+    this.cd.detectChanges();
+
+    this.appRef.tick();
+
+   setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+        this.cd.detectChanges();
+        console.log('✨ Pantalla forzada a repintarse');
+    }, 100);
+  }
+
+  
   async login(event: Event) {
     event.preventDefault();
 
     const correo = this.email.trim();
     const contrasenna = this.password.trim();
+
 
     if (!correo || !contrasenna) {
       this.animateError();
@@ -51,13 +71,25 @@ export class LoginPage {
     const valido = await this.sql.validarUsuario(correo, contrasenna);
 
     if (valido) {
+      
+      localStorage.setItem('token', 'sesion-activa'); 
+      localStorage.setItem('usuario_actual', correo); 
+
       this.animateSuccess();
-      this.router.navigateByUrl('/home');
+      // Pequeña espera para ver la animación antes de cambiar de página
+      setTimeout(() => {
+        // En el éxito del login:
+            this.ngZone.run(() => {
+                this.navCtrl.navigateRoot('/home', { animated: false }); 
+        });
+      }, 400);
+      
     } else {
       this.animateError();
       this.isToastOpen = true;
     }
   }
+    
 
 
 animateSuccess() {
@@ -93,6 +125,10 @@ animateError() {
 
 
   goToRegistro() {
-    this.router.navigateByUrl('/registro');
-  }
+      this.ngZone.run(() => {
+        this.navCtrl.navigateForward('/registro');
+      });
+    }
+
+    
 }

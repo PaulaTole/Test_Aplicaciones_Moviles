@@ -1,37 +1,49 @@
-<div class="login-container">
-  <div class="logo-container">
-    <img src="assets/logo.png" alt="Logo" style="display:block; margin:auto; width:120px; height:auto;">
+<ion-content [fullscreen]="true">
+  <div class="login-container">
+    <div class="logo-container">
+      <img src="assets/logo.png" alt="Logo" style="display:block; margin:auto; width:120px; height:auto; margin-bottom: 20px;">
+      <h2 style="text-align: center;">Music App</h2>
+    </div>
+
+    <form (submit)="login($event)">
+      <ion-item lines="full">
+        <ion-input
+          #emailInput
+          label="Email"
+          labelPlacement="floating"
+          type="email"
+          [(ngModel)]="email"
+          name="email"
+          placeholder="email@domain.com">
+        </ion-input>
+      </ion-item>
+
+      <ion-item lines="full" class="ion-margin-top">
+        <ion-input
+          #passwordInput
+          type="password"
+          label="Password"
+          labelPlacement="floating"
+          [(ngModel)]="password"
+          name="password">
+          <ion-input-password-toggle slot="end"></ion-input-password-toggle>
+        </ion-input>
+      </ion-item>
+
+      <ion-button expand="block" type="submit" class="ion-margin-top">
+        Iniciar sesión
+      </ion-button>
+    </form>
+
+    <ion-button expand="block" fill="clear" (click)="goToRegistro()" class="ion-margin-top">
+      Registrarse
+    </ion-button>
   </div>
-  <form (submit)="login($event)">
-    <ion-item>
-      <ion-input
-        #emailInput
-        label="Email input"
-        type="email"
-        [(ngModel)]="email"
-        name="email"
-        placeholder="email@domain.com">
-      </ion-input>
-    </ion-item>
-    <ion-item class="ion-margin-top">
-      <ion-input
-        #passwordInput
-        type="password"
-        label="Password"
-        [(ngModel)]="password"
-        name="password"
-        value="NeverGonnaGiveYouUp">
-        <ion-input-password-toggle slot="end"></ion-input-password-toggle>
-      </ion-input>
-    </ion-item>
-    <ion-button expand="block" type="submit">Iniciar sesión</ion-button>
-  </form>
-  <ion-button expand="block" fill="outline" (click)="goToRegistro()">Registrarse</ion-button>
-</div>
+</ion-content>
 
 <ion-toast
   [isOpen]="isToastOpen"
   message="Credenciales incorrectas"
-  [duration]="5000"
+  [duration]="2000"
   (didDismiss)="isToastOpen = false"
 ></ion-toast>

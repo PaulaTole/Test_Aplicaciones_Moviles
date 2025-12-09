@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef,  } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription, interval } from 'rxjs';
 import { CommonModule } from '@angular/common';
@@ -30,8 +30,14 @@ export class HomePage implements OnInit, OnDestroy {
   constructor(
     public audioService: AudioService,
     private router: Router,
+    private cd: ChangeDetectorRef,
     private bd: BaseDatos
   ) {}
+
+  ionViewWillEnter() {
+    console.log('🏠 Home activo - Repintando');
+    this.cd.detectChanges();
+  }
 
   async ngOnInit() {
     // carga usuarios (mock o sqlite según plataforma)

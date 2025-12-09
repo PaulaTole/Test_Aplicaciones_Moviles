@@ -8,6 +8,7 @@ export interface Track {
   
   name: string;
   file: string; 
+  cover?: string;
 }
 
 @Injectable({

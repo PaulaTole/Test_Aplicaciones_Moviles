@@ -1,5 +1,5 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, ElementRef, ViewChild, NgZone, ChangeDetectorRef } from '@angular/core'; // <--- 1. Agregado NgZone
+import { NavController } from '@ionic/angular'; // <--- 2. Cambiamos Router por NavController (Mejor para Ionic)
 import { ToastController } from '@ionic/angular';
 import { createAnimation } from '@ionic/core';
 
@@ -36,8 +36,14 @@ export class RegistroPage {
   constructor(
     private sql: BaseDatos,
     private toastController: ToastController,
-    private router: Router
+    private navCtrl: NavController,
+    private ngZone: NgZone, 
+    private cd: ChangeDetectorRef         
   ) {}
+
+  ionViewWillEnter() {
+    this.cd.detectChanges();
+  }
 
   async ngOnInit() {
     await this.sql.crearBD(); 
@@ -50,31 +56,60 @@ export class RegistroPage {
     const correo = this.correo.trim();
     const contrasenna = this.contrasenna.trim();
 
+    // --- VALIDACIÓN 1: CAMPOS VACÍOS ---
     if (!nombre || !correo || !contrasenna) {
       await this.mostrarToast("Por favor completa todos los campos", "warning");
       this.reproducirAnimacionError();
       return;
     }
 
+    // --- VALIDACIÓN 2: FORMATO DE CORREO (REGEX) ---
+    const emailRegex = /^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    if (!emailRegex.test(correo)) {
+      await this.mostrarToast("El formato del correo no es válido 📧", "danger");
+      this.reproducirAnimacionError();
+      return;
+    }
+
+    // --- VALIDACIÓN 3: LARGO DE CONTRASEÑA ---
+    if (contrasenna.length < 6) {
+      await this.mostrarToast("La contraseña debe tener al menos 6 caracteres 🔒", "warning");
+      this.reproducirAnimacionError();
+      return;
+    }
+
+    // --- INTENTO DE REGISTRO ---
     try {
       const ok = await this.sql.insertarUsuario(nombre, correo, contrasenna);
 
       if (ok) {
         await this.mostrarToast("Registro exitoso 🎉", "success");
         this.animateSuccess();
-        this.router.navigate(['/login']);
+        
+        // --- 5. EL FIX PARA LA PANTALLA NEGRA ---
+        // Forzamos a Angular a navegar dentro de su zona segura
+       setTimeout(() => {
+            this.ngZone.run(() => {
+                // animated: false es CRÍTICO para evitar la pantalla blanca
+                this.navCtrl.navigateRoot('/login', { animated: false }); 
+            });
+        }, 500);
+
       } else {
         throw new Error("No se pudo insertar");
       }
 
     } catch (e) {
       console.error("Error en registro:", e);
-      await this.mostrarToast("Error al registrar", "danger");
+      await this.mostrarToast("Error al registrar (¿Correo duplicado?)", "danger");
     }
   }
 
   irALogin() {
-    this.router.navigate(['/login']);
+    // También protegemos la navegación normal
+    this.ngZone.run(() => {
+        this.navCtrl.navigateBack('/login');
+    });
   }
 
   reproducirAnimacionError() {
@@ -118,5 +153,4 @@ export class RegistroPage {
 
     anim.play();
   }
-
 }

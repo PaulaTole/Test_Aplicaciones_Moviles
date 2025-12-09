@@ -1,38 +1,63 @@
 <ion-header>
   <ion-toolbar color="light">
-    <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons>
+    <ion-buttons slot="start">
+      <ion-menu-button auto-hide="false"></ion-menu-button>
+    </ion-buttons>
 
-    <div style="display:flex;align-items:center;gap:12px;">
-      <img src="assets/icon/default_user_profile.png" style="width:36px;height:36px;border-radius:50%;">
-      <div>
-        <h3 style="margin:0">{{ usuarios[0]?.nombre || 'Usuario' }}</h3>
-        <p style="margin:0;font-size:12px;color:gray;">{{ usuarios[0]?.correo || '' }}</p>
+    <ion-title>Reproduciendo</ion-title>
+
+    <ion-buttons slot="end" class="ion-padding-end">
+      <div style="font-size: 12px; text-align: right;">
+        <p style="margin:0; font-weight:bold;">{{ usuarios[0]?.nombre || 'Usuario' }}</p>
       </div>
-    </div>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content id="now-playing-content">
-  <h2 style="padding:16px 16px 0 16px;">Reproduciendo ahora</h2>
+<ion-content class="ion-padding" [fullscreen]="true">
+  
+  <div class="player-container">
+    
+    <div class="cover-container">
+      <img [src]="currentTrack?.cover || 'assets/icon/music_icon.png'" 
+           class="cover-image"
+           [class.spinning]="isPlaying">
+    </div>
 
-  <ion-card *ngIf="currentTrack">
-    <ion-card-header>
-      <ion-card-title>{{ currentTrack?.name }}</ion-card-title>
-    </ion-card-header>
+    <div class="track-info">
+      <h2>{{ currentTrack?.name || 'Selecciona una canción' }}</h2>
+      <p>Artistas Varios</p> </div>
 
-    <ion-card-content>
-      <ion-item lines="none">
-        <ion-range [min]="0" [max]="duration" [value]="progress" (ionChange)="onRangeChange($event)"></ion-range>
-      </ion-item>
+    <div class="progress-section">
+      <ion-range 
+        [min]="0" 
+        [max]="duration" 
+        [value]="progress" 
+        (ionChange)="onRangeChange($event)"
+        color="primary">
+        
+        <ion-label slot="start" style="font-size: 12px;">{{ progress | number:'1.0-0' }}</ion-label>
+        <ion-label slot="end" style="font-size: 12px;">{{ duration | number:'1.0-0' }}</ion-label>
+      </ion-range>
+    </div>
 
-      <p>Tiempo: {{ progress | number:'1.0-0' }} / {{ duration | number:'1.0-0' }}</p>
+    <div class="controls-section">
+      <ion-button fill="clear" size="large" (click)="prev()">
+        ⏮️
+      </ion-button>
 
-      <div style="display:flex;gap:12px;justify-content:center;padding-top:8px;">
-        <ion-button (click)="prev()">⏮️</ion-button>
-        <ion-button *ngIf="!isPlaying" (click)="resumeTrack()">▶️</ion-button>
-        <ion-button *ngIf="isPlaying" color="danger" (click)="pauseTrack()">⏸️</ion-button>
-        <ion-button (click)="next()">⏭️</ion-button>
-      </div>
-    </ion-card-content>
-  </ion-card>
+      <ion-button *ngIf="!isPlaying" (click)="resumeTrack()" shape="round" color="primary" size="large">
+        ▶️
+      </ion-button>
+      
+      <ion-button *ngIf="isPlaying" (click)="pauseTrack()" shape="round" color="danger" size="large">
+        ⏸️
+      </ion-button>
+
+      <ion-button fill="clear" size="large" (click)="next()">
+        ⏭️
+      </ion-button>
+    </div>
+
+  </div>
 </ion-content>
