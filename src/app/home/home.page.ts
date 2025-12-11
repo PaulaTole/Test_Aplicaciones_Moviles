@@ -8,7 +8,7 @@ import {IonContent, IonHeader, IonTitle, IonToolbar,
   IonFab, IonFabButton, IonFabList, IonIcon, IonRouterOutlet, IonAvatar } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { grid, logOut, person, musicalNotes, home } from 'ionicons/icons';
-
+import { MusicApiService } from '../service/music-api';
 import { AudioService, Track } from '../service/audio';
 import { BaseDatos } from '../service/sql-lite';
 
@@ -33,6 +33,7 @@ export class HomePage implements OnInit, OnDestroy {
   usuarios: any[] = [];
   usuarioActual: any = null;
   currentImage: string = 'assets/icon/default_user_profile.png';
+  listaApi: any[] = [];
 
   private subs: Subscription[] = [];
 
@@ -41,7 +42,8 @@ export class HomePage implements OnInit, OnDestroy {
     private router: Router,
     private cd: ChangeDetectorRef,
     private bd: BaseDatos, 
-    private navCtrl: NavController
+    private navCtrl: NavController,
+    private api: MusicApiService
   ) {
     addIcons({ 'grid': grid, 'log-out': logOut, 'person': person, 'musical-notes': musicalNotes, 'home': home });
   }
@@ -114,6 +116,15 @@ export class HomePage implements OnInit, OnDestroy {
         this.duration = this.audioService.getDuration();
       })
     );
+
+    this.api.getDatos().subscribe(datos => {
+      // Le inventamos una foto al azar porque la API solo trae texto
+      this.listaApi = datos.map((item: any) => ({
+        titulo: item.title,
+        id: item.id,
+        imagen: `https://picsum.photos/id/${item.id + 10}/100/100` 
+      }));
+    });
   }
 
   playTrack(i: number) { this.audioService.playTrack(i); }
