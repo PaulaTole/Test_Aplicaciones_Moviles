@@ -1,24 +1,12 @@
-<ion-header>
-  <ion-toolbar color="light">
-    <ion-header>
-      <ion-toolbar color="light"> <ion-buttons slot="start">
-          <ion-menu-button auto-hide="false"></ion-menu-button>
-        </ion-buttons>
-        <ion-title>Inicio</ion-title> </ion-toolbar>
-    </ion-header>
-
-    <div class="user-header" style="display:flex; align-items:center; gap:12px;">
-      <img src="assets/icon/default_user_profile.png" class="user-icon" style="width:40px;height:40px;border-radius:50%;"/>
-      <div class="user-info">
-        <h3 style="margin:0;">{{ usuarios[0]?.nombre || 'Usuario' }}</h3>
-        <p style="margin:0;font-size:12px;color:gray;">{{ usuarios[0]?.correo || '' }}</p>
-      </div>
-    </div>
-  </ion-toolbar>
+<ion-header class="ion-no-border">
+  <img src="assets/logo.png" alt="Logo" style="height:40px; margin-left:16px;">
 </ion-header>
 
-<ion-content>
-  <h2 style="padding:16px 16px 0 16px;">Reproductor</h2>
+<ion-content class="ion-padding">
+
+  <h1>Bienvenido...</h1>
+
+  <h2 style="padding:16px 16px 0 0;">Reproductor</h2>
 
   <ion-list>
     <ion-item *ngFor="let track of tracks; let i = index">
@@ -43,4 +31,18 @@
       <ion-range [min]="0" [max]="duration" [value]="progress" (ionChange)="seekTrack($event)"></ion-range>
     </ion-item>
   </ion-list>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button color="primary">
+      <ion-icon name="grid"></ion-icon>
+    </ion-fab-button>
+    
+    <ion-fab-list side="top">
+      <ion-fab-button (click)="logout()" color="danger"><ion-icon name="log-out"></ion-icon></ion-fab-button>
+      <ion-fab-button routerLink="/main/perfil" color="secondary"><ion-icon name="person"></ion-icon></ion-fab-button>
+      <ion-fab-button routerLink="/main/now-playing" color="tertiary"><ion-icon name="musical-notes"></ion-icon></ion-fab-button>
+      <ion-fab-button routerLink="/main/home" color="light"><ion-icon name="home"></ion-icon></ion-fab-button>
+    </ion-fab-list>
+  </ion-fab>
+
 </ion-content>

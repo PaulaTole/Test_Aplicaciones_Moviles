@@ -1,12 +1,14 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { RouterModule } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { addIcons } from 'ionicons';
+import { grid, logOut, person, musicalNotes, home } from 'ionicons/icons';
 
 @Component({
-  standalone: true,
   selector: 'app-layout',
   templateUrl: './layout.page.html',
-  imports: [IonicModule, CommonModule, RouterModule],
+  standalone: true,
+  imports: [CommonModule, IonicModule, RouterModule]
 })
 export class LayoutPage {}

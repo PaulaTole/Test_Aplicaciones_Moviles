@@ -1,15 +1,24 @@
-<ion-header>
+<ion-header class="ion-no-border">
   <ion-toolbar color="light">
-      <ion-header>
-        <ion-toolbar color="light"> <ion-buttons slot="start">
-            <ion-menu-button auto-hide="false"></ion-menu-button>
-          </ion-buttons>
-          
-          <ion-title>Inicio</ion-title> </ion-toolbar>
-      </ion-header>
+    
+    <ion-buttons slot="start">
+      <ion-menu-button auto-hide="false"></ion-menu-button>
+    </ion-buttons>
 
-    <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons>
-    <ion-title>Editar Perfil</ion-title>
+    <ion-title>Perfil</ion-title>
+
+    <ion-buttons slot="end" class="ion-padding-end">
+      <div class="user-header" style="display:flex; align-items:center; gap:8px;">
+        <div class="user-info" style="text-align: right;">
+          <h3 style="margin:0; font-size: 14px;">{{ usuario[0]?.nombre || 'Usuario' }}</h3>
+          <p style="margin:0; font-size:10px; color:gray;">{{ usuario[0]?.correo || '' }}</p>
+        </div>
+        <img src="assets/icon/default_user_profile.png" 
+             class="user-icon" 
+             style="width:35px; height:35px; border-radius:50%; object-fit: cover; border: 1px solid #ccc;"/>
+      </div>
+    </ion-buttons>
+
   </ion-toolbar>
 </ion-header>
 

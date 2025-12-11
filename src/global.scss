@@ -35,7 +35,7 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 
-/* --- CSS DEFINITIVO Y LIMPIO --- */
+/* --- CSS DEFINITIVO Y CORREGIDO --- */
 
 /* 1. Fondo blanco base para evitar pantallas negras */
 html, body, ion-app, ion-content {
@@ -49,14 +49,44 @@ html, body {
   margin: 0;
   padding: 0;
 }
-
-/* 3. SOLO ESTO: Forzar opacidad, pero SIN tocar el display/z-index */
-/* Esto permite que Ionic maneje el orden, nosotros solo aseguramos que se vea */
+//* 4. ANTÍDOTO PANTALLA NEGRA */
+/* Hacemos visibles las páginas activas */
 .ion-page:not(.ion-page-hidden) {
   opacity: 1 !important;
   visibility: visible !important;
 }
 
-ion-content {
-  --background: #ffffff; 
+/* --- FUERZA VISUAL PARA EL FAB --- */
+
+ion-fab {
+  /* Posición fija respecto a la pantalla, no al contenedor */
+  position: fixed !important; 
+  bottom: 20px !important;
+  right: 20px !important;
+  
+  /* Z-Index absurdo para estar encima de las páginas blancas */
+  z-index: 999999 !important; 
+  
+  /* Asegura que se pinte */
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+}
+
+/* Asegurar que el botón tenga color y tamaño */
+ion-fab-button {
+  --background: var(--ion-color-primary, #3880ff);
+  opacity: 1 !important;
+  display: block !important;
+}
+
+ion-fab-button[color="danger"] { --background: var(--ion-color-danger) !important; }
+ion-fab-button[color="secondary"] { --background: var(--ion-color-secondary) !important; }
+ion-fab-button[color="tertiary"] { --background: var(--ion-color-tertiary) !important; }
+ion-fab-button[color="light"] { --background: #cccccc !important; --color: #000000 !important; }
+
+ion-icon {
+  font-size: 24px;
+  visibility: visible !important;
+  opacity: 1 !important;
 }

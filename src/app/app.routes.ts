@@ -23,7 +23,7 @@ export const routes: Routes = [
 
   // --- PÁGINAS INTERNAS QUE SÍ LLEVAN MENÚ ---
   {
-    path: '',
+    path: 'main',
     loadComponent: () =>
       import('./layout/layout.page').then(m => m.LayoutPage),
 

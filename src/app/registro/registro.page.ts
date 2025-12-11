@@ -105,18 +105,11 @@ export class RegistroPage {
     }
   }
 
-  irALogin() {
-    // También protegemos la navegación normal
-    this.ngZone.run(() => {
-        this.navCtrl.navigateBack('/login');
-    });
-  }
-
   reproducirAnimacionError() {
     const anim = createAnimation()
-      .addElement(this.nombreInput.nativeElement)
-      .addElement(this.emailInput.nativeElement)
-      .addElement(this.contrasennaInput.nativeElement)
+      .addElement(this.nombreInput?.nativeElement)
+      .addElement(this.emailInput?.nativeElement)
+      .addElement(this.contrasennaInput?.nativeElement)
       .duration(300)
       .keyframes([
         { offset: 0, transform: "translateX(0)" },
@@ -139,11 +132,11 @@ export class RegistroPage {
     await toast.present();
   }
 
-  animateSuccess() {
+ animateSuccess() {
     const anim = createAnimation()
-      .addElement(this.nombreInput.nativeElement)
-      .addElement(this.emailInput.nativeElement)
-      .addElement(this.contrasennaInput.nativeElement)
+      .addElement(this.nombreInput?.nativeElement)
+      .addElement(this.emailInput?.nativeElement)
+      .addElement(this.contrasennaInput?.nativeElement)
       .duration(300)
       .keyframes([
         { offset: 0, transform: "scale(1)", background: "transparent" },

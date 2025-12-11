@@ -80,7 +80,7 @@ export class LoginPage {
       setTimeout(() => {
         // En el éxito del login:
             this.ngZone.run(() => {
-                this.navCtrl.navigateRoot('/home', { animated: false }); 
+                this.navCtrl.navigateRoot('/main/home', { animated: false }); 
         });
       }, 400);
       

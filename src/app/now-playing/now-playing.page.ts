@@ -2,7 +2,8 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef, NgZone } from '@angula
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { IonicModule, NavController } from '@ionic/angular';
 import { Subscription, interval } from 'rxjs';
-
+import { addIcons } from 'ionicons';
+import { grid, logOut, person, musicalNotes, home } from 'ionicons/icons';
 import { AudioService, Track } from '../service/audio';
 import { BaseDatos } from '../service/sql-lite';
 
@@ -17,6 +18,7 @@ export class NowPlayingPage implements OnInit, OnDestroy {
   
   
   usuarios: any[] = []; 
+  usuarioActual: any = null;
   
   currentTrack: Track | null = null;
   progress = 0;
@@ -31,15 +33,26 @@ export class NowPlayingPage implements OnInit, OnDestroy {
     private cd: ChangeDetectorRef,
     private ngZone: NgZone,
     private navCtrl: NavController
-  ) {}
+  ) {
+    addIcons({ grid, logOut, person, musicalNotes, home });
+  }
 
   async ngOnInit() {
     // carga usuarios (mock o sqlite según plataforma)
+    await this.bd.crearBD();
     try {
-      this.usuarios = await this.bd.obtenerUsuarios();
-    } catch (e) {
-      console.log('Error cargando usuarios', e);
-    }
+          this.usuarios = await this.bd.obtenerUsuarios();
+        } catch (e) {
+          console.error('❌ Error al cargar usuarios en HomePage:', e);
+          this.usuarios = [];
+        }
+        const usuarioAlmacenado = localStorage.getItem('usuario_actual');
+        if (usuarioAlmacenado) {
+          this.usuarioActual = this.usuarios.find(u => u.correo === usuarioAlmacenado);
+        }
+        if (!this.usuarioActual && this.usuarios.length > 0) {
+          this.usuarioActual = this.usuarios[0];
+        }
 
     
     this.subs.push(this.audioService.trackInfo$.subscribe(t => {
@@ -66,9 +79,18 @@ export class NowPlayingPage implements OnInit, OnDestroy {
     );
   }
 
-  // Fix pantalla negra al volver
+  
   ionViewWillEnter() {
+    console.log('Now-Playing activo - Verificando seguridad...');
     this.cd.detectChanges();
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      console.warn('🚨 Acceso no autorizado detectado en Now-Playing (Botón Atrás). Expulsando...');
+      this.navCtrl.navigateRoot('/login', { animated: false });
+      return;
+    }
+
   }
 
   // Controles
@@ -84,5 +106,14 @@ export class NowPlayingPage implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subs.forEach(s => s.unsubscribe());
+  }
+ 
+ logout() {
+    console.log('👋 Cerrando sesión...');
+    // borrar
+    localStorage.removeItem('token'); 
+    localStorage.removeItem('usuario_actual');
+    //navegar
+    this.navCtrl.navigateRoot('/login', { animated: false });
   }
 }
