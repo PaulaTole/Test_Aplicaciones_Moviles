@@ -5,36 +5,19 @@
       <ion-menu-button auto-hide="false"></ion-menu-button>
     </ion-buttons>
 
-    <ion-title>Reproductor</ion-title>
+    <ion-title>Reproduciendo</ion-title>
 
     <ion-buttons slot="end" class="ion-padding-end">
       <div class="user-header" style="display:flex; align-items:center; gap:8px;">
         <div class="user-info" style="text-align: right;">
-          <h3 style="margin:0; font-size: 14px;">{{ usuarios[0]?.nombre || 'Usuario' }}</h3>
-          <p style="margin:0; font-size:10px; color:gray;">{{ usuarios[0]?.correo || '' }}</p>
+          <h3 style="margin:0; font-size: 14px;">{{ usuarioActual?.nombre || 'Usuario' }}</h3>
         </div>
-        <img src="assets/icon/default_user_profile.png" 
-             class="user-icon" 
-             style="width:35px; height:35px; border-radius:50%; object-fit: cover; border: 1px solid #ccc;"/>
+        <ion-avatar style="width:35px; height:35px; border: 1px solid #ccc;">
+          <img [src]="currentImage" style="object-fit: cover;"/>
+        </ion-avatar>
       </div>
     </ion-buttons>
 
-  </ion-toolbar>
-</ion-header>
-
-<ion-header>
-  <ion-toolbar color="light">
-    <ion-buttons slot="start">
-      <ion-menu-button auto-hide="false"></ion-menu-button>
-    </ion-buttons>
-
-    <ion-title>Reproduciendo</ion-title>
-
-    <ion-buttons slot="end" class="ion-padding-end">
-      <div style="font-size: 12px; text-align: right;">
-        <p style="margin:0; font-weight:bold;">{{ usuarios[0]?.nombre || 'Usuario' }}</p>
-      </div>
-    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -50,7 +33,8 @@
 
     <div class="track-info">
       <h2>{{ currentTrack?.name || 'Selecciona una canción' }}</h2>
-      <p>Artistas Varios</p> </div>
+      <p>Artistas Varios</p> 
+    </div>
 
     <div class="progress-section">
       <ion-range 
@@ -85,7 +69,6 @@
 
   </div>
 
-
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
     <ion-fab-button color="primary">
       <ion-icon name="grid"></ion-icon>
@@ -93,10 +76,9 @@
     
     <ion-fab-list side="top">
       <ion-fab-button (click)="logout()" color="danger"><ion-icon name="log-out"></ion-icon></ion-fab-button>
-      <ion-fab-button routerLink="/main/perfil" color="secondary"><ion-icon name="person"></ion-icon></ion-fab-button>
-      <ion-fab-button routerLink="/main/now-playing" color="tertiary"><ion-icon name="musical-notes"></ion-icon></ion-fab-button>
-      <ion-fab-button routerLink="/main/home" color="light"><ion-icon name="home"></ion-icon></ion-fab-button>
+      <ion-fab-button routerLink="/main/perfil" routerDirection="root" color="secondary"><ion-icon name="person"></ion-icon></ion-fab-button>
+      <ion-fab-button routerLink="/main/now-playing" routerDirection="root" color="tertiary"><ion-icon name="musical-notes"></ion-icon></ion-fab-button>
+      <ion-fab-button routerLink="/main/home" routerDirection="root" color="light"><ion-icon name="home"></ion-icon></ion-fab-button>
     </ion-fab-list>
   </ion-fab>
 </ion-content>
-

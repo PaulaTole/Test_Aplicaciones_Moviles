@@ -1,9 +1,11 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Subscription, interval } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { IonicModule, NavController} from '@ionic/angular';
-//import { IonHeader, IonToolbar } from '@ionic/angular/standalone';
+import {IonContent, IonHeader, IonTitle, IonToolbar, 
+  IonButtons, IonMenuButton, IonList, IonItem, IonThumbnail, IonLabel, IonButton, IonRange,
+  IonFab, IonFabButton, IonFabList, IonIcon, IonRouterOutlet, IonAvatar } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { grid, logOut, person, musicalNotes, home } from 'ionicons/icons';
 
@@ -15,7 +17,9 @@ import { BaseDatos } from '../service/sql-lite';
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule/*,IonHeader, IonToolbar*/],
+  imports: [IonicModule, CommonModule, IonList, IonItem, IonThumbnail, IonLabel, IonButton, IonRange,
+  IonFab, IonFabButton, IonFabList, IonIcon, IonContent, IonHeader, IonTitle, IonToolbar, IonButtons, IonMenuButton
+ , IonRouterOutlet, RouterLink, IonAvatar],
 })
 export class HomePage implements OnInit, OnDestroy {
   tracks: Track[] = [];
@@ -28,6 +32,7 @@ export class HomePage implements OnInit, OnDestroy {
 
   usuarios: any[] = [];
   usuarioActual: any = null;
+  currentImage: string = 'assets/icon/default_user_profile.png';
 
   private subs: Subscription[] = [];
 
@@ -38,28 +43,32 @@ export class HomePage implements OnInit, OnDestroy {
     private bd: BaseDatos, 
     private navCtrl: NavController
   ) {
-    addIcons({ grid, logOut, person, musicalNotes, home });
+    addIcons({ 'grid': grid, 'log-out': logOut, 'person': person, 'musical-notes': musicalNotes, 'home': home });
   }
 
   ionViewWillEnter() {
     console.log('🏠 Home activo - Verificando seguridad...');
-    
-    // 1. EL FIX DE PANTALLA NEGRA
     this.cd.detectChanges();
 
-    // 2. EL FIX DE SEGURIDAD "ANTI-ZOMBIE" 🧟‍♂️🚫
     const token = localStorage.getItem('token');
     
     if (!token) {
-      console.warn('🚨 Acceso no autorizado detectado en Home (Botón Atrás). Expulsando...');
-      // Si no hay token, lo mandamos al login inmediatamente
+      console.warn('🚨 Acceso no autorizado. Expulsando...');
       this.navCtrl.navigateRoot('/login', { animated: false });
       return;
+    }
+
+    
+    const correo = localStorage.getItem('usuario_actual');
+    if (correo) {
+      const foto = localStorage.getItem('foto_' + correo);
+      if (foto) {
+        this.currentImage = foto;
+      }
     }
   }
 
   async ngOnInit() {
-    // carga usuarios (mock o sqlite según plataforma)
     await this.bd.crearBD();
     try {
       this.usuarios = await this.bd.obtenerUsuarios();
@@ -67,33 +76,37 @@ export class HomePage implements OnInit, OnDestroy {
       console.error('❌ Error al cargar usuarios en HomePage:', e);
       this.usuarios = [];
     }
+
+    // LÓGICA DE USUARIO ACTUAL
     const usuarioAlmacenado = localStorage.getItem('usuario_actual');
     if (usuarioAlmacenado) {
       this.usuarioActual = this.usuarios.find(u => u.correo === usuarioAlmacenado);
-    }
-    if (!this.usuarioActual && this.usuarios.length > 0) {
+      
+      // Cargar foto inicial
+      const foto = localStorage.getItem('foto_' + usuarioAlmacenado);
+      if (foto) this.currentImage = foto;
+
+    } else if (this.usuarios.length > 0) {
+      // Fallback por si acaso (opcional)
       this.usuarioActual = this.usuarios[0];
     }
 
-    
+    // Suscripciones de Audio (Igual que antes)
     this.subs.push(
       this.audioService.playlist$.subscribe(list => {
         this.tracks = list || [];
       })
     );
 
-    // suscripciones
     this.subs.push(
       this.audioService.trackInfo$.subscribe(track => {
         this.currentTrack = track;
-        // currentIndex lo guarda el servicio
         (this.currentIndex as any) = (this.audioService as any).currentIndex ?? -1;
       })
     );
 
     this.subs.push(this.audioService.isPlaying$.subscribe(v => (this.isPlaying = v)));
 
-    // loop de progreso
     this.subs.push(
       interval(400).subscribe(() => {
         const p = this.audioService.getProgress();
@@ -103,35 +116,20 @@ export class HomePage implements OnInit, OnDestroy {
     );
   }
 
-  playTrack(i: number) {
-    this.audioService.playTrack(i);
-  }
-
-  pauseTrack() {
-    this.audioService.pauseTrack();
-  }
-
+  playTrack(i: number) { this.audioService.playTrack(i); }
+  pauseTrack() { this.audioService.pauseTrack(); }
   seekTrack(ev: any) {
     const val = ev?.detail?.value;
     if (typeof val === 'number') this.audioService.seek(val);
   }
+  irANowPlaying() { this.router.navigate(['/main/now-playing']); }
 
-  irANowPlaying() {
-    this.router.navigate(['/main/now-playing']);
-  }
-
-  ngOnDestroy() {
-    this.subs.forEach(s => s.unsubscribe());
-  }
+  ngOnDestroy() { this.subs.forEach(s => s.unsubscribe()); }
 
   logout() {
     console.log('👋 Cerrando sesión...');
-    
-    // 1. Borrar las llaves
     localStorage.removeItem('token'); 
     localStorage.removeItem('usuario_actual'); 
-    // 2. Navegar a login
     this.navCtrl.navigateRoot('/login', { animated: false });
   }
-
 }

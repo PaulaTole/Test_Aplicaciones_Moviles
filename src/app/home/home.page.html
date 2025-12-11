@@ -1,12 +1,24 @@
 <ion-header class="ion-no-border">
-  <img src="assets/logo.png" alt="Logo" style="height:40px; margin-left:16px;">
+  <ion-toolbar color="light">
+    <img slot="start" src="assets/logo.png" alt="Logo" style="height:40px; margin-left:16px;">
+
+    <ion-buttons slot="end" class="ion-padding-end">
+      <div class="user-header" style="display:flex; align-items:center; gap:8px;">
+        <div class="user-info" style="text-align: right;">
+          <h3 style="margin:0; font-size: 14px;">{{ usuarioActual?.nombre || 'Invitado' }}</h3>
+        </div>
+        <ion-avatar style="width:35px; height:35px; border: 1px solid #ccc;">
+          <img [src]="currentImage" style="object-fit: cover;"/>
+        </ion-avatar>
+      </div>
+    </ion-buttons>
+  </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
 
-  <h1>Bienvenido...</h1>
-
-  <h2 style="padding:16px 16px 0 0;">Reproductor</h2>
+  <h1>Hola, {{ usuarioActual?.nombre || 'Usuario' }} 👋</h1>
+  <h2 style="padding:16px 16px 0 0;">Tu Lista de Reproducción</h2>
 
   <ion-list>
     <ion-item *ngFor="let track of tracks; let i = index">
@@ -39,9 +51,9 @@
     
     <ion-fab-list side="top">
       <ion-fab-button (click)="logout()" color="danger"><ion-icon name="log-out"></ion-icon></ion-fab-button>
-      <ion-fab-button routerLink="/main/perfil" color="secondary"><ion-icon name="person"></ion-icon></ion-fab-button>
-      <ion-fab-button routerLink="/main/now-playing" color="tertiary"><ion-icon name="musical-notes"></ion-icon></ion-fab-button>
-      <ion-fab-button routerLink="/main/home" color="light"><ion-icon name="home"></ion-icon></ion-fab-button>
+      <ion-fab-button routerLink="/main/perfil" routerDirection="root" color="secondary"><ion-icon name="person"></ion-icon></ion-fab-button>
+      <ion-fab-button routerLink="/main/now-playing" routerDirection="root" color="tertiary"><ion-icon name="musical-notes"></ion-icon></ion-fab-button>
+      <ion-fab-button routerLink="/main/home" routerDirection="root" color="light"><ion-icon name="home"></ion-icon></ion-fab-button>
     </ion-fab-list>
   </ion-fab>
 
